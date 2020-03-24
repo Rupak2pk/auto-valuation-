@@ -8,8 +8,8 @@ import openpyxl
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
-#book = openpyxl.load_workbook('Template.xlsx')
-#sheet = book.active
+book = openpyxl.load_workbook('Template.xlsx')
+sheet = book.active
 
 #book.sa
 
@@ -192,6 +192,7 @@ class Ui_MainWindow(object):
         self.run_btn = QtWidgets.QPushButton(self.centralwidget)
         self.run_btn.setGeometry(QtCore.QRect(50, 470, 75, 23))
         self.run_btn.setObjectName("run_btn")
+        self.run_btn.clicked.connect(self.run)
         
         self.reset_btn = QtWidgets.QPushButton(self.centralwidget)
         self.reset_btn.setGeometry(QtCore.QRect(140, 470, 75, 23))
@@ -249,7 +250,16 @@ class Ui_MainWindow(object):
 
         if filename:
             self.key_ratios_txt.setText(filename)   
-        
+    
+    def run(self):
+        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_file_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticket_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "" or self.custom_txt.text() == "":
+            msg = QMessageBox()
+            msg.setWindowTitle("Notice")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("All information must be filled")
+            notice = msg.exec()        
+            
+            
     def reset(self):
         self.Income_statement_txt.setText("")
         self.balance_sheet_txt.setText("")
