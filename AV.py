@@ -5,14 +5,21 @@
 
 import sys
 import openpyxl
+from openpyxl import *
+import shutil
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
 book = openpyxl.load_workbook('Template.xlsx')
 sheet = book.active
 
-#book.sa
+def copy_template():
+    original = 'Template.xlsx'
+    target = 'S_info.xlsx'
+    
+    shutil.copyfile(original, target)
 
+copy_template()
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
