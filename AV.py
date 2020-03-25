@@ -7,19 +7,14 @@ import sys
 import openpyxl
 from openpyxl import *
 import shutil
+import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
 book = openpyxl.load_workbook('Template.xlsx')
 sheet = book.active
 
-def copy_template():
-    original = 'Template.xlsx'
-    target = 'S_info.xlsx'
-    
-    shutil.copyfile(original, target)
 
-copy_template()
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -98,6 +93,7 @@ class Ui_MainWindow(object):
         self.company_ticket_txt = QtWidgets.QLineEdit(self.centralwidget)
         self.company_ticket_txt.setGeometry(QtCore.QRect(180, 280, 61, 20))
         self.company_ticket_txt.setObjectName("company_ticket_txt")
+        
         
         self.company_ticket_lbl = QtWidgets.QLabel(self.centralwidget)
         self.company_ticket_lbl.setGeometry(QtCore.QRect(60, 280, 101, 20))
@@ -206,14 +202,14 @@ class Ui_MainWindow(object):
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset)
         
-        self.cancel_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.cancel_btn.setGeometry(QtCore.QRect(320, 470, 75, 23))
-        self.cancel_btn.setObjectName("cancel_btn")
-        self.cancel_btn.clicked.connect(self.cancel)
+        self.close_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.close_btn.setGeometry(QtCore.QRect(320, 470, 75, 23))
+        self.close_btn.setObjectName("close_btn")
+        self.close_btn.clicked.connect(self.close)
         
         self.get_bond_data = QtWidgets.QPushButton(self.centralwidget)
         self.get_bond_data.setGeometry(QtCore.QRect(230, 470, 75, 23))
-        #self.get_bond_data.clicked.connect(self.cancel)
+        #self.get_bond_data.clicked.connect(self.close)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -229,19 +225,19 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
     def get_xl_income(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if filename:
             self.Income_statement_txt.setText(filename)
         
     def get_xl_balance(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if filename:
             self.balance_sheet_txt.setText(filename)
         
     def get_xl_cash(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if filename:
             self.cash_file_txt.setText(filename)
@@ -253,18 +249,40 @@ class Ui_MainWindow(object):
             self.debt_spreadsheet_txt.setText(filename)   
     
     def get_xl_ratios(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if filename:
             self.key_ratios_txt.setText(filename)   
     
     def run(self):
-        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_file_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticket_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "" or self.custom_txt.text() == "":
+        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_file_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticket_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
             msg.setText("All information must be filled")
             notice = msg.exec()        
+        
+        elif self.custom_rd.isChecked() and self.custom_txt.text() == "":
+            msg = QMessageBox()
+            msg.setWindowTitle("Notice")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("All information must be filled")
+            notice = msg.exec()            
+
+        else:
+            ticker = self.company_ticket_txt.text()
+            original = 'Template.xlsx'
+            target = ticker + '_Valuation.xlsx'
+            shutil.copyfile(original, target)
+            msg = QMessageBox()
+            msg.setWindowTitle("Notice")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Workbook Created!")
+            notice = msg.exec()
+            os.system("start EXCEL.EXE " + target)
+            book = openpyxl.load_workbook(target)
+            book_income = openpyxl.load_workbook(target)
+            
             
             
     def reset(self):
@@ -278,7 +296,7 @@ class Ui_MainWindow(object):
         self.risk_free_rate_txt.setText("")
         self.custom_txt.setText("")
         
-    def cancel(self):
+    def close(self):
         app.quit()
 
     def retranslateUi(self, MainWindow):
@@ -303,7 +321,7 @@ class Ui_MainWindow(object):
         self.custom_rd.setText(_translate("MainWindow", "Custom"))
         self.run_btn.setText(_translate("MainWindow", "Run"))
         self.reset_btn.setText(_translate("MainWindow", "Reset"))
-        self.cancel_btn.setText(_translate("MainWindow", "Cancel"))
+        self.close_btn.setText(_translate("MainWindow", "Close"))
         self.get_bond_data.setText(_translate("MainWindow", "Get Bond Data"))
         
 class Controller:
