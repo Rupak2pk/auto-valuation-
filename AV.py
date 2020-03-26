@@ -6,13 +6,17 @@
 import sys
 import openpyxl
 from openpyxl import *
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import shutil
 import requests
 import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
-book = openpyxl.load_workbook('Template.xlsx')
+book = openpyxl.load_workbook('Template.xlsm')
 sheet = book.active
 
 #openpyxl books
@@ -58,7 +62,7 @@ class Ui_MainWindow(object):
         self.company_ticker_btn = QtWidgets.QPushButton(self.centralwidget)
         self.company_ticker_btn.setGeometry(QtCore.QRect(235, 130, 125, 23))
         self.company_ticker_btn.setObjectName("company_ticker_btn")
-        self.company_ticker_btn.clicked.connect(self.get_xl_cash)
+        self.company_ticker_btn.clicked.connect(self.morningstar_download)
         
         self.balance_sheet_btn = QtWidgets.QPushButton(self.centralwidget)
         self.balance_sheet_btn.setGeometry(QtCore.QRect(380, 160, 75, 23))
@@ -268,8 +272,41 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
     def morningstar_download(self):
-        pass
-    
+        ticker = self.company_ticker_txt.text()          
+        try:
+            options = webdriver.ChromeOptions()
+            prefs = {
+            "download.default_directory": r"C:\Users\Rupka\Documents\GitHub\auto-valuation-\ " + ticker,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True
+            }            
+            options.add_experimental_option('prefs', prefs)
+            ticker = self.company_ticker_txt.text()   
+            driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options = options)
+            driver.set_window_size(777, 777)
+            driver.get("http://financials.morningstar.com/balance-sheet/bs.html?t="+ticker+"&region=usa&culture=en-US")
+            driver.execute_script("javascript:SRT_stocFund.orderControl('desc','Descending')")
+            driver.execute_script("javascript:SRT_stocFund.Export();")
+            driver.get("http://financials.morningstar.com/income-statement/is.html?t="+ticker+"&region=usa&culture=en-US")
+            driver.execute_script("javascript:SRT_stocFund.orderControl('desc','Descending')")
+            driver.execute_script("javascript:SRT_stocFund.Export();")
+            driver.get("http://financials.morningstar.com/cash-flow/cf.html?t="+ticker+"&region=usa&culture=en-US")
+            driver.execute_script("javascript:SRT_stocFund.orderControl('desc','Descending')")
+            driver.execute_script("javascript:SRT_stocFund.Export();")
+            driver.get("http://financials.morningstar.com/ratios/r.html?t="+ticker+"&region=usa&culture=en-US")
+            driver.execute_script("javascript:orderChange('desc','Descending');")
+            driver.execute_script("javascript:exportKeyStat2CSV();")
+            driver.get("http://www.google.com")
+            driver.quit()
+        except:
+            driver.quit()
+            msg = QMessageBox()
+            msg.setWindowTitle("Notice")
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("An error has occured, possibility on MorningStar's part. Please try again.")
+            notice = msg.exec()            
+        
+        
     def get_xl_income(self):
         global book_income
         income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
@@ -333,8 +370,8 @@ class Ui_MainWindow(object):
 
         else:
             ticker = self.company_ticker_txt.text()
-            original = 'Template.xlsx'
-            target = ticker + '_Valuation.xlsx'
+            original = 'Template.xlsm'
+            target = ticker + '_Valuation.xlsm'
             shutil.copyfile(original, target)
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
