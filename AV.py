@@ -14,11 +14,16 @@ from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 book = openpyxl.load_workbook('Template.xlsx')
 sheet = book.active
 
+global book_income
+global book_balance
+global book_cash
+global book_debt
+global book_ratios
 
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(485, 545)
+        MainWindow.resize(485, 580)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         
@@ -164,8 +169,34 @@ class Ui_MainWindow(object):
         self.risk_free_rate_lbl.setFont(font)
         self.risk_free_rate_lbl.setObjectName("risk_free_rate_lbl")
         
+        self.terminal_txt = QtWidgets.QLineEdit(self.centralwidget)
+        self.terminal_txt.setGeometry(QtCore.QRect(180, 370, 61, 20))
+        self.terminal_txt.setText("")
+        self.terminal_txt.setObjectName("terminal_txt")
+        
+        self.terminal_lbl = QtWidgets.QLabel(self.centralwidget)
+        self.terminal_lbl.setGeometry(QtCore.QRect(35, 370, 150, 20))
+        font = QtGui.QFont()
+        font.setFamily("Cambria")
+        font.setPointSize(10)
+        self.terminal_lbl.setFont(font)
+        self.terminal_lbl.setObjectName("terminal_lbl")
+        
+        self.year_growth_txt = QtWidgets.QLineEdit(self.centralwidget)
+        self.year_growth_txt.setGeometry(QtCore.QRect(180, 400, 61, 20))
+        self.year_growth_txt.setText("")
+        self.year_growth_txt.setObjectName("risk_free_rate_txt")
+        
+        self.year_growth_lbl = QtWidgets.QLabel(self.centralwidget)
+        self.year_growth_lbl.setGeometry(QtCore.QRect(40, 400, 150, 20))
+        font = QtGui.QFont()
+        font.setFamily("Cambria")
+        font.setPointSize(10)
+        self.year_growth_lbl.setFont(font)
+        self.year_growth_lbl.setObjectName("risk_free_rate_lbl")
+               
         self.growth_rate_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.growth_rate_lbl.setGeometry(QtCore.QRect(30, 370, 81, 20))
+        self.growth_rate_lbl.setGeometry(QtCore.QRect(30, 430, 81, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -173,7 +204,7 @@ class Ui_MainWindow(object):
         self.growth_rate_lbl.setObjectName("growth_rate_lbl")
         
         self.smallest_of_etc_rd = QtWidgets.QRadioButton(self.centralwidget)
-        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 400, 231, 17))
+        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 460, 231, 17))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(11)
@@ -181,7 +212,7 @@ class Ui_MainWindow(object):
         self.smallest_of_etc_rd.setObjectName("smallest_of_etc_rd")
         
         self.custom_rd = QtWidgets.QRadioButton(self.centralwidget)
-        self.custom_rd.setGeometry(QtCore.QRect(60, 430, 231, 17))
+        self.custom_rd.setGeometry(QtCore.QRect(60, 490, 231, 17))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(11)
@@ -189,31 +220,31 @@ class Ui_MainWindow(object):
         self.custom_rd.setObjectName("custom_rd")
         
         self.custom_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.custom_txt.setGeometry(QtCore.QRect(140, 430, 51, 20))
+        self.custom_txt.setGeometry(QtCore.QRect(140, 490, 51, 20))
         self.custom_txt.setObjectName("custom_txt")
         
         self.run_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.run_btn.setGeometry(QtCore.QRect(50, 470, 75, 23))
+        self.run_btn.setGeometry(QtCore.QRect(50, 520, 75, 23))
         self.run_btn.setObjectName("run_btn")
         self.run_btn.clicked.connect(self.run)
         
         self.reset_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.reset_btn.setGeometry(QtCore.QRect(140, 470, 75, 23))
+        self.reset_btn.setGeometry(QtCore.QRect(140, 520, 75, 23))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset)
         
         self.close_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.close_btn.setGeometry(QtCore.QRect(320, 470, 75, 23))
+        self.close_btn.setGeometry(QtCore.QRect(320, 520, 75, 23))
         self.close_btn.setObjectName("close_btn")
         self.close_btn.clicked.connect(self.close)
         
         self.get_bond_data = QtWidgets.QPushButton(self.centralwidget)
-        self.get_bond_data.setGeometry(QtCore.QRect(230, 470, 75, 23))
+        self.get_bond_data.setGeometry(QtCore.QRect(230, 520, 75, 23))
         #self.get_bond_data.clicked.connect(self.close)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 485, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 580, 21))
         self.menubar.setObjectName("menubar")
         
         MainWindow.setMenuBar(self.menubar)
@@ -225,34 +256,34 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
     def get_xl_income(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
-        if filename:
-            self.Income_statement_txt.setText(filename)
+        if income_filename:
+            self.Income_statement_txt.setText(income_filename)
         
     def get_xl_balance(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        balance_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
-        if filename:
-            self.balance_sheet_txt.setText(filename)
+        if balance_filename:
+            self.balance_sheet_txt.setText(balance_filename)
         
     def get_xl_cash(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        cash_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
-        if filename:
-            self.cash_file_txt.setText(filename)
+        if cash_filename:
+            self.cash_file_txt.setText(cash_filename)
         
     def get_xl_debt(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
 
-        if filename:
-            self.debt_spreadsheet_txt.setText(filename)   
+        if debt_filename:
+            self.debt_spreadsheet_txt.setText(debt_filename)   
     
     def get_xl_ratios(self):
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        ratios_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
-        if filename:
-            self.key_ratios_txt.setText(filename)   
+        if ratios_filename:
+            self.key_ratios_txt.setText(ratios_filename)   
     
     def run(self):
         if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_file_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticket_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":
@@ -316,6 +347,8 @@ class Ui_MainWindow(object):
         self.key_ratios_btn.setText(_translate("MainWindow", "Choose File"))
         self.mrperp_lbl.setText(_translate("MainWindow", "MRP/ERP"))
         self.risk_free_rate_lbl.setText(_translate("MainWindow", "Risk Free Rate"))
+        self.terminal_lbl.setText(_translate("MainWindow", "Terminal Growth Rate"))
+        self.year_growth_lbl.setText(_translate("MainWindow", "Years of High Growth"))
         self.growth_rate_lbl.setText(_translate("MainWindow", "Growth Rate:"))
         self.smallest_of_etc_rd.setText(_translate("MainWindow", "Use smallest of IAR, SAR, or ROLC"))
         self.custom_rd.setText(_translate("MainWindow", "Custom"))
@@ -324,16 +357,11 @@ class Ui_MainWindow(object):
         self.close_btn.setText(_translate("MainWindow", "Close"))
         self.get_bond_data.setText(_translate("MainWindow", "Get Bond Data"))
         
-class Controller:
-    def open_main_window(self):
-        self.Gui = QtWidgets.QMainWindow()
-        self.ui = Ui_MainWindow()
-        self.ui.setup_Ui(self.Gui)
-        self.Gui.show()  
-        
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Windows')
-    Controller = Controller()
-    Controller.open_main_window()
+    Gui = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setup_Ui(Gui)
+    Gui.show()  
     sys.exit(app.exec_())
