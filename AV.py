@@ -4,8 +4,7 @@
 #Auto Valuation
 
 import sys
-import openpyxl
-from openpyxl import *
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -13,13 +12,13 @@ from selenium.webdriver.chrome.options import Options
 import shutil
 import requests
 import os
+import os.path
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
-book = openpyxl.load_workbook('Template.xlsm')
-sheet = book.active
+#book = openpyxl.load_workbook('Template.xlsm')
+#sheet = book.active
 
-#openpyxl books
 book_income = ''
 book_balance = ''
 book_cash = ''
@@ -298,15 +297,30 @@ class Ui_MainWindow(object):
             driver.execute_script("javascript:exportKeyStat2CSV();")
             driver.get("http://www.google.com")
             driver.quit()
+            
+            #Adds files to the txt statement
+            try:
+                self.Income_statement_txt.setText(os.path.realpath(ticker + "\{} Income Statement").format(ticker))
+                self.balance_sheet_txt.setText(os.path.realpath(ticker + "\{} Balance Sheet").format(ticker))
+                self.cash_flow_txt.setText(os.path.realpath(ticker + "\{} Cash Flow").format(ticker))
+                self.key_ratios_txt.setText(os.path.realpath(ticker + "\{} Key Ratios").format(ticker))
+                
+            except:
+                msg = QMessageBox()
+                msg.setWindowTitle("Notice")
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Files may have succesfully been downloaded but there was an error in putting them in retrieving them.")
+                notice = msg.exec()    
+                
         except:
             driver.quit()
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
-            msg.setText("An error has occured, possibility on MorningStar's part. Please try again.")
-            notice = msg.exec()            
-        
-        
+            msg.setText("An error has occured, there is either: /n*An nonexistent company ticker /n*Error on Morningstar's website  /n*Interruption with the download process. /nPlease try again.")
+            notice = msg.exec()  
+            
+    
     def get_xl_income(self):
         global book_income
         income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
