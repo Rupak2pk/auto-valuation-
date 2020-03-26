@@ -7,6 +7,7 @@ import sys
 import openpyxl
 from openpyxl import *
 import shutil
+import requests
 import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
@@ -152,6 +153,8 @@ class Ui_MainWindow(object):
         self.mrperp__txt.setGeometry(QtCore.QRect(180, 310, 61, 20))
         self.mrperp__txt.setText("")
         self.mrperp__txt.setObjectName("mrperp__txt")
+        self.onlyNumbers = QtGui.QDoubleValidator()
+        self.mrperp__txt.setValidator(self.onlyNumbers)     
         
         self.mrperp_lbl = QtWidgets.QLabel(self.centralwidget)
         self.mrperp_lbl.setGeometry(QtCore.QRect(100, 310, 61, 20))
@@ -190,9 +193,8 @@ class Ui_MainWindow(object):
         self.terminal_lbl.setFont(font)
         self.terminal_lbl.setObjectName("terminal_lbl")
         
-        self.year_growth_txt = QtWidgets.QLineEdit(self.centralwidget)
+        self.year_growth_txt = QtWidgets.QSpinBox(self.centralwidget)
         self.year_growth_txt.setGeometry(QtCore.QRect(180, 400, 61, 20))
-        self.year_growth_txt.setText("")
         self.year_growth_txt.setObjectName("risk_free_rate_txt")
         
         self.year_growth_lbl = QtWidgets.QLabel(self.centralwidget)
@@ -202,7 +204,9 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.year_growth_lbl.setFont(font)
         self.year_growth_lbl.setObjectName("risk_free_rate_lbl")
-               
+        self.year_growth_txt.setMinimum(0)
+        self.year_growth_txt.setMaximum(10)
+        
         self.growth_rate_lbl = QtWidgets.QLabel(self.centralwidget)
         self.growth_rate_lbl.setGeometry(QtCore.QRect(30, 430, 81, 20))
         font = QtGui.QFont()
@@ -262,6 +266,9 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+    
+    def morningstar_download(self):
+        pass
     
     def get_xl_income(self):
         global book_income
