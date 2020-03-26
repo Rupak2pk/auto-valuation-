@@ -56,7 +56,7 @@ class KeyRatiosDownloader(object):
         :return: List of pandas.DataFrames containing the key ratios.
         """
         url = (r'http://financials.morningstar.com/ajax/exportKR2CSV.html?' +
-               r'&callback=?&t={t}&region={reg}&culture={cult}&cur={cur}'.format(
+               r'&callback=?&t={t}&region={reg}&culture={cult}&cur={cur}&order=desc'.format(
                    t=ticker, reg=region, cult=culture, cur=currency))
         with urllib.request.urlopen(url) as response:
             tables = self._parse_tables(response)
@@ -329,7 +329,7 @@ class FinancialsDownloader(object):
                r'ReportProcess4HtmlAjax.html?&t=' + ticker +
                r'&region=usa&culture=en-US&cur=USD' +
                r'&reportType=' + report_type + r'&period=12' +
-               r'&dataType=A&order=asc&columnYear=5&rounding=3&view=raw')
+               r'&dataType=A&order=desc&columnYear=5&rounding=3&view=raw')
         with urllib.request.urlopen(url) as response:
             json_text = response.read().decode(u'utf-8')
 
