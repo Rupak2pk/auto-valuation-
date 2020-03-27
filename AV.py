@@ -4,7 +4,8 @@
 #Auto Valuation
 
 import sys
-import pandas as pd
+import csv
+import openpyxl
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -269,13 +270,22 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        print(os.path.realpath("AV"))
     
     def morningstar_download(self):
-        ticker = self.company_ticker_txt.text()          
+        ticker = self.company_ticker_txt.text()
+        location = os.getcwd()
+        path = os.path.join(location, ticker)
+        try:
+            shutil.rmtree(path)
+        except:
+            pass
+        
         try:
             options = webdriver.ChromeOptions()
+            current_dir = os.getcwd()
             prefs = {
-            "download.default_directory": r"C:\Users\Rupka\Documents\GitHub\auto-valuation-\ " + ticker,
+            "download.default_directory": current_dir + '\\' + ticker,
             "download.prompt_for_download": False,
             "download.directory_upgrade": True
             }            
@@ -299,27 +309,47 @@ class Ui_MainWindow(object):
             driver.quit()
             
             #Adds files to the txt statement
-            try:
-                self.Income_statement_txt.setText(os.path.realpath(ticker + "\{} Income Statement").format(ticker))
-                self.balance_sheet_txt.setText(os.path.realpath(ticker + "\{} Balance Sheet").format(ticker))
-                self.cash_flow_txt.setText(os.path.realpath(ticker + "\{} Cash Flow").format(ticker))
-                self.key_ratios_txt.setText(os.path.realpath(ticker + "\{} Key Ratios").format(ticker))
-                
-            except:
-                msg = QMessageBox()
-                msg.setWindowTitle("Notice")
-                msg.setIcon(QMessageBox.Information)
-                msg.setText("Files may have succesfully been downloaded but there was an error in putting them in retrieving them.")
-                notice = msg.exec()    
+            wb = openpyxl.Workbook()
+            ws = wb.active     
+            with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Income Statement.csv") as f:
+                reader = csv.reader(f, delimiter = ':')
+                for row in reader:
+                    ws.append(row)
+            wb.save(os.path.realpath(ticker + "\\{} Income Statement.xlsx").format(ticker))
+            os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Income Statement.csv")
+            self.Income_statement_txt.setText(os.path.realpath(ticker + "\\{} Income Statement.xlsx").format(ticker))
+            
+            with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Balance Sheet.csv") as f:
+                reader = csv.reader(f, delimiter = ':')
+                for row in reader:
+                    ws.append(row)
+            wb.save(os.path.realpath(ticker + "\\{} Balance Sheet.xlsx").format(ticker))
+            os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Balance Sheet.csv")            
+            self.balance_sheet_txt.setText(os.path.realpath(ticker + "\\{} Balance Sheet.xlsx").format(ticker))
+            
+            with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Cash Flow.csv") as f:
+                reader = csv.reader(f, delimiter = ':')
+                for row in reader:
+                    ws.append(row)
+            wb.save(os.path.realpath(ticker + "\\{} Cash Flow.xlsx").format(ticker))
+            os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Cash Flow.csv")            
+            self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow.xlsx").format(ticker))
+            
+            with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv") as f:
+                reader = csv.reader(f, delimiter = ':')
+                for row in reader:
+                    ws.append(row)
+            wb.save(os.path.realpath(ticker + "\\{} Key Ratios.xlsx").format(ticker))
+            os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv")            
+            self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.xlsx").format(ticker)) 
                 
         except:
             driver.quit()
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
-            msg.setText("An error has occured, there is either: /n*An nonexistent company ticker /n*Error on Morningstar's website  /n*Interruption with the download process. /nPlease try again.")
-            notice = msg.exec()  
-            
+            msg.setText("An error has occured, there is either: \n *An nonexistent company ticker \n* Error on Morningstar's website  \n *Interruption with the download process. \nPlease try again.")
+            notice = msg.exec()
     
     def get_xl_income(self):
         global book_income
@@ -387,15 +417,16 @@ class Ui_MainWindow(object):
             original = 'Template.xlsm'
             target = ticker + '_Valuation.xlsm'
             shutil.copyfile(original, target)
+            
+            #replacing sheets 
+            valuation_location = os.path.realpath(target)
+            
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
             msg.setText("Workbook Created!")
             notice = msg.exec()
             os.system("start EXCEL.EXE " + target)
-            book = openpyxl.load_workbook(target)
-            book_income = openpyxl.load_workbook(target)
-            
             
             
     def reset(self):
