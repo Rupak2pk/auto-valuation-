@@ -4,6 +4,7 @@
 #Auto Valuation
 
 import sys
+import openpyxl
 import csv
 import glob
 from xlsxwriter.workbook import Workbook
@@ -13,9 +14,10 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import shutil
-import requests
 import os
 import os.path
+import win32com.client
+import xlrd
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
@@ -312,9 +314,9 @@ class Ui_MainWindow(object):
             
             #Adds files to the txt statement
             
-            self.Income_statement_txt.setText(os.path.realpath(ticker + "\\{} Income Statement").format(ticker))            
-            self.balance_sheet_txt.setText(os.path.realpath(ticker + "\\{} Balance Sheet").format(ticker))           
-            self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow").format(ticker))
+            self.Income_statement_txt.setText(os.path.realpath(ticker + "\\{} Income Statement.csv").format(ticker) )            
+            self.balance_sheet_txt.setText(os.path.realpath(ticker + "\\{} Balance Sheet.csv").format(ticker))           
+            self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow.csv").format(ticker))
             
             '''with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv") as f:
                 reader = csv.reader(f, delimiter = ':')
@@ -322,7 +324,7 @@ class Ui_MainWindow(object):
                     ws.append(row)'''
             #wb.save(os.path.realpath(ticker + "\\{} Key Ratios.xlsx").format(ticker))
             #os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv")            
-            self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios").format(ticker)) 
+            self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.csv").format(ticker)) 
                 
         except:
             driver.quit()
@@ -367,8 +369,8 @@ class Ui_MainWindow(object):
 
         if ratios_filename:
             self.key_ratios_txt.setText(ratios_filename)  
-            book_ratios = openpyxl.load_workbook(ratios_filename)
-            sheet_ratios = book_ratios.active            
+            #book_ratios = openpyxl.load_workbook(ratios_filename)
+            #sheet_ratios = book_ratios.active            
     
     def run(self):
         if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":
@@ -387,33 +389,71 @@ class Ui_MainWindow(object):
 
         else:
             ticker = self.company_ticker_txt.text()
-            original = 'Template.xlsm'
-            target = ticker + '_Valuation.xlsm'
+            original = 'Template.xlsx'
+            target = ticker + '_Valuation.xlsx'
             shutil.copyfile(original, target)
             
             #copying...
-            workbook = Workbook(target)
-            
-            for csvfile in glob.glob(os.path.join('.', '*.csv')):
-                worksheet = workbook.add_worksheet(os.path.splitext(csvfile)[0]) # worksheet with csv file name
-                with open(csvfile, 'rb') as f:
-                    reader = csv.reader(f)
-                    for r, row in enumerate(reader):
-                        for c, col in enumerate(row):
-                            worksheet.write(r, c, col) # write the csv file content into it
-            workbook.close()
-            #replacing sheets 
-            '''valuation_location = os.path.realpath(target)
+            '''wb = openpyxl.load_workbook(ticker + '_Valuation.xlsx')
+            worksheet_names = wb.sheetnames  
+            sheet_index = worksheet_names.index('Income Statement') 
+            wb.active = sheet_index'''
+            #replace sheets 
+            valuation_location = os.path.realpath(target)
             book = openpyxl.load_workbook(target)
-            sheets = book.get_sheet_name('Income Statement')
+            sheet_name = 'Income Statement'
             
-            income_directory = self.Income_statement_txt.text()
-            income_book = openpyxl.load_workbook(income_directory)
-            income_sheets = income_book.get_sheet_name()
+            #Load Income statement
+            income_directory = self.Income_statement_txt.text() 
+            income_book = pd.read_csv(income_directory)
+            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
+                writer.book = book
+                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                income_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
             
+            #Load Balance Statement    
+            balance_directory = self.balance_sheet_txt.text() 
+            balance_book = pd.read_csv(balance_directory)
+            sheet_name = 'Balance Sheet (Annual)'
+            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
+                writer.book = book
+                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                balance_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
             
-            book.remove(sheets[6])
-            book.copy_worksheet(income_book)'''
+            #Load Cash Flow Statement    
+            cash_directory = self.cash_flow_txt.text() 
+            cash_book = pd.read_csv(cash_directory)
+            sheet_name = 'Cash Flow Statement'
+            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
+                writer.book = book
+                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                cash_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
+                
+            #Load Key Ratios   
+            ratio_directory = self.key_ratios_txt.text() 
+            ratio_book = pd.read_csv(ratio_directory, sep=",", error_bad_lines=False)
+            sheet_name = 'Key Ratios'
+            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
+                writer.book = book
+                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                ratio_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
+            
+            #Load Debt   
+            debt_directory = self.debt_spreadsheet_txt.text() 
+            debt_book = pd.read_excel(debt_directory)
+            sheet_name = 'Debt Template'
+            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
+                writer.book = book
+                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                debt_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
+                
+            
+            '''xl=win32com.client.Dispatch('Excel.Application')
+            xl.Workbooks.Open(Filename= target, ReadOnly=0)
+            xl.Application.Run('Debt_Inserter')
+            x1.DisplayAlerts = False
+            xl.Application.Quit()
+            del xl'''               
             
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
