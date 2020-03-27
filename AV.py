@@ -270,7 +270,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        print(os.path.realpath("AV"))
     
     def morningstar_download(self):
         ticker = self.company_ticker_txt.text()
@@ -348,7 +347,7 @@ class Ui_MainWindow(object):
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
-            msg.setText("An error has occured, there is either: \n *An nonexistent company ticker \n* Error on Morningstar's website  \n *Interruption with the download process. \nPlease try again.")
+            msg.setText("An error has occured, there is either: \n* An nonexistent company ticker \n* Error on Morningstar's website  \n* Interruption with the download process \nPlease try again.")
             notice = msg.exec()
     
     def get_xl_income(self):
@@ -438,6 +437,8 @@ class Ui_MainWindow(object):
         self.company_ticker_txt.setText("")
         self.mrperp__txt.setText("")
         self.risk_free_rate_txt.setText("")
+        self.terminal_txt.setText("")
+        self.year_growth_txt.setValue(0)
         self.custom_txt.setText("")
         
     def close(self):
