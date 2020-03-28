@@ -5,11 +5,9 @@
 
 import sys
 import openpyxl
-import xlsxwriter
 import csv
 import glob
 from xlsxwriter.workbook import Workbook
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -19,20 +17,30 @@ import os
 import os.path
 import win32com.client
 import xlrd
+from openpyxl.utils import get_column_letter
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
 #book = openpyxl.load_workbook('Template.xlsm')
 #sheet = book.active
-    
+  
 def write_to_target(target, directory, sheet_name):
     book = openpyxl.load_workbook(target)
-    sheet_book = pd.read_csv(directory)
-    options = Options()
-    with pd.ExcelWriter(target, engine='openpyxl', options = {'strings_to_numbers': True})  as writer:
-        writer.book = book
-        writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-        sheet_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine = 'openpyxl') 
+    ws = book.get_sheet_by_name(sheet_name)
+    f = open(directory)
+    reader = csv.reader(f)
+    for row_index, row in enumerate(reader):
+        for column_index, cell in enumerate(row):
+            column_letter = get_column_letter((column_index + 1))
+            s = cell
+            try:
+                s=float(s)
+            except ValueError:
+                pass
+
+            ws.cell('%s%s'%(column_letter, (row_index + 1))).value = s
+    
+    book.save(filename = target)
 
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
@@ -319,14 +327,7 @@ class Ui_MainWindow(object):
             
             self.Income_statement_txt.setText(os.path.realpath(ticker + "\\{} Income Statement.csv").format(ticker) )            
             self.balance_sheet_txt.setText(os.path.realpath(ticker + "\\{} Balance Sheet.csv").format(ticker))           
-            self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow.csv").format(ticker))
-            
-            '''with open(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv") as f:
-                reader = csv.reader(f, delimiter = ':')
-                for row in reader:
-                    ws.append(row)'''
-            #wb.save(os.path.realpath(ticker + "\\{} Key Ratios.xlsx").format(ticker))
-            #os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv")            
+            self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow.csv").format(ticker))            
             self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.csv").format(ticker))     
                 
         except:
@@ -342,28 +343,28 @@ class Ui_MainWindow(object):
     
     def get_xl_income(self):
         global book_income
-        income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if income_filename:
             self.Income_statement_txt.setText(income_filename)
         
     def get_xl_balance(self):
         global book_balance
-        balance_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        balance_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if balance_filename:
             self.balance_sheet_txt.setText(balance_filename)         
         
     def get_xl_cash(self):
         global book_cash
-        cash_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        cash_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if cash_filename:
             self.cash_flow_txt.setText(cash_filename)
         
     def get_xl_debt(self):
         global book_debt
-        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx);;CSV (*.CSV)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if debt_filename:
             self.debt_spreadsheet_txt.setText(debt_filename)             
@@ -371,13 +372,11 @@ class Ui_MainWindow(object):
     
     def get_xl_ratios(self):
         global book_ratios
-        ratios_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        ratios_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if ratios_filename:
             self.key_ratios_txt.setText(ratios_filename)  
-            #book_ratios = openpyxl.load_workbook(ratios_filename)
-            #sheet_ratios = book_ratios.active            
-    
+           
     def run(self):
         '''if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":'''
         if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "":
@@ -400,20 +399,13 @@ class Ui_MainWindow(object):
             target = ticker + '_Valuation.xlsx'
             shutil.copyfile(original, target)
             
-            #copying...
-            #replace sheets 
             book = openpyxl.load_workbook(target)
             sheet_name = 'Income Statement'
             
             write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
-            #Load Income statement
-                        
-            '''xl=win32com.client.Dispatch('Excel.Application')
-            xl.Workbooks.Open(Filename= target, ReadOnly=0)
-            xl.Application.Run('Debt_Inserter')
-            x1.DisplayAlerts = False
-            xl.Application.Quit()
-            del xl'''               
+            write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
+            write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
+            write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
             
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
