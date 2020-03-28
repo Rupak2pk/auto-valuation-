@@ -5,6 +5,7 @@
 
 import sys
 import openpyxl
+import xlsxwriter
 import csv
 import glob
 from xlsxwriter.workbook import Workbook
@@ -23,13 +24,15 @@ from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
 #book = openpyxl.load_workbook('Template.xlsm')
 #sheet = book.active
-
-book_income = ''
-book_balance = ''
-book_cash = ''
-book_debt = '' 
-book_ratios = ''
-
+    
+def write_to_target(target, directory, sheet_name):
+    book = openpyxl.load_workbook(target)
+    sheet_book = pd.read_csv(directory)
+    options = Options()
+    with pd.ExcelWriter(target, engine='openpyxl', options = {'strings_to_numbers': True})  as writer:
+        writer.book = book
+        writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+        sheet_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine = 'openpyxl') 
 
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
@@ -324,10 +327,13 @@ class Ui_MainWindow(object):
                     ws.append(row)'''
             #wb.save(os.path.realpath(ticker + "\\{} Key Ratios.xlsx").format(ticker))
             #os.remove(current_dir + '\\' + ticker + "\\" + ticker + " " + "Key Ratios.csv")            
-            self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.csv").format(ticker)) 
+            self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.csv").format(ticker))     
                 
         except:
-            driver.quit()
+            try:
+                driver.quit()
+            except:
+                pass
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
@@ -373,7 +379,8 @@ class Ui_MainWindow(object):
             #sheet_ratios = book_ratios.active            
     
     def run(self):
-        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":
+        '''if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":'''
+        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "":
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
@@ -394,60 +401,13 @@ class Ui_MainWindow(object):
             shutil.copyfile(original, target)
             
             #copying...
-            '''wb = openpyxl.load_workbook(ticker + '_Valuation.xlsx')
-            worksheet_names = wb.sheetnames  
-            sheet_index = worksheet_names.index('Income Statement') 
-            wb.active = sheet_index'''
             #replace sheets 
-            valuation_location = os.path.realpath(target)
             book = openpyxl.load_workbook(target)
             sheet_name = 'Income Statement'
             
+            write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
             #Load Income statement
-            income_directory = self.Income_statement_txt.text() 
-            income_book = pd.read_csv(income_directory)
-            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
-                writer.book = book
-                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-                income_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
-            
-            #Load Balance Statement    
-            balance_directory = self.balance_sheet_txt.text() 
-            balance_book = pd.read_csv(balance_directory)
-            sheet_name = 'Balance Sheet (Annual)'
-            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
-                writer.book = book
-                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-                balance_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
-            
-            #Load Cash Flow Statement    
-            cash_directory = self.cash_flow_txt.text() 
-            cash_book = pd.read_csv(cash_directory)
-            sheet_name = 'Cash Flow Statement'
-            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
-                writer.book = book
-                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-                cash_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
-                
-            #Load Key Ratios   
-            ratio_directory = self.key_ratios_txt.text() 
-            ratio_book = pd.read_csv(ratio_directory, sep=",", error_bad_lines=False)
-            sheet_name = 'Key Ratios'
-            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
-                writer.book = book
-                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-                ratio_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
-            
-            #Load Debt   
-            debt_directory = self.debt_spreadsheet_txt.text() 
-            debt_book = pd.read_excel(debt_directory)
-            sheet_name = 'Debt Template'
-            with pd.ExcelWriter(target, engine='openpyxl')  as writer:
-                writer.book = book
-                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-                debt_book.to_excel(writer, sheet_name=sheet_name, startrow=0, startcol=0, engine='openpyxl')
-                
-            
+                        
             '''xl=win32com.client.Dispatch('Excel.Application')
             xl.Workbooks.Open(Filename= target, ReadOnly=0)
             xl.Application.Run('Debt_Inserter')
