@@ -16,13 +16,10 @@ import shutil
 import os
 import os.path
 import win32com.client
-import xlrd
 from openpyxl.utils import get_column_letter
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
-#book = openpyxl.load_workbook('Template.xlsm')
-#sheet = book.active
   
 def write_to_target(target, directory, sheet_name):
     book = openpyxl.load_workbook(target)
@@ -68,7 +65,7 @@ class Ui_MainWindow(object):
         self.company_ticker_txt.setObjectName("company_ticker_txt")
         
         self.company_ticker_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.company_ticker_lbl.setGeometry(QtCore.QRect(60, 130, 101, 20))
+        self.company_ticker_lbl.setGeometry(QtCore.QRect(40, 130, 131, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -86,7 +83,7 @@ class Ui_MainWindow(object):
         self.balance_sheet_btn.clicked.connect(self.get_xl_balance)
         
         self.balance_sheet_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.balance_sheet_lbl.setGeometry(QtCore.QRect(80, 160, 101, 20))
+        self.balance_sheet_lbl.setGeometry(QtCore.QRect(40, 160, 101, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -104,7 +101,7 @@ class Ui_MainWindow(object):
         self.cash_flow_btn.clicked.connect(self.get_xl_cash)
         
         self.cash_flow_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.cash_flow_lbl.setGeometry(QtCore.QRect(100, 190, 101, 20))
+        self.cash_flow_lbl.setGeometry(QtCore.QRect(40, 190, 101, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -117,17 +114,17 @@ class Ui_MainWindow(object):
         self.cash_flow_txt.setReadOnly(True)
         
         self.Income_statement_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.Income_statement_txt.setGeometry(QtCore.QRect(180, 280, 201, 21))
+        self.Income_statement_txt.setGeometry(QtCore.QRect(180, 220, 201, 21))
         self.Income_statement_txt.setObjectName("Income_statement_txt")
         self.Income_statement_txt.setReadOnly(True)
         
         self.income_statement_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.income_statement_btn.setGeometry(QtCore.QRect(380, 280, 75, 23))
+        self.income_statement_btn.setGeometry(QtCore.QRect(380, 220, 75, 23))
         self.income_statement_btn.setObjectName("income_statement_btn")
         self.income_statement_btn.clicked.connect(self.get_xl_income)
         
         self.income_statement_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.income_statement_lbl.setGeometry(QtCore.QRect(60, 280, 101, 20))
+        self.income_statement_lbl.setGeometry(QtCore.QRect(40, 220, 151, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -135,7 +132,7 @@ class Ui_MainWindow(object):
         self.income_statement_lbl.setObjectName("income_statement_lbl")
         
         self.debt_spreadsheet_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.debt_spreadsheet_lbl.setGeometry(QtCore.QRect(60, 220, 101, 20))
+        self.debt_spreadsheet_lbl.setGeometry(QtCore.QRect(40, 280, 151, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -143,17 +140,17 @@ class Ui_MainWindow(object):
         self.debt_spreadsheet_lbl.setObjectName("debt_spreadsheet_lbl")
         
         self.debt_spreadsheet_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.debt_spreadsheet_btn.setGeometry(QtCore.QRect(380, 220, 75, 23))
+        self.debt_spreadsheet_btn.setGeometry(QtCore.QRect(380, 280, 75, 23))
         self.debt_spreadsheet_btn.setObjectName("debt_spreadsheet_btn")
         self.debt_spreadsheet_btn.clicked.connect(self.get_xl_debt)
         
         self.debt_spreadsheet_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.debt_spreadsheet_txt.setGeometry(QtCore.QRect(180, 220, 201, 21))
+        self.debt_spreadsheet_txt.setGeometry(QtCore.QRect(180, 280, 201, 21))
         self.debt_spreadsheet_txt.setObjectName("debt_spreadsheet_txt")
         self.debt_spreadsheet_txt.setReadOnly(True)
         
         self.key_ratios_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.key_ratios_lbl.setGeometry(QtCore.QRect(90, 250, 101, 20))
+        self.key_ratios_lbl.setGeometry(QtCore.QRect(40, 250, 101, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -177,7 +174,7 @@ class Ui_MainWindow(object):
         self.mrperp__txt.setValidator(self.onlyNumbers)     
         
         self.mrperp_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.mrperp_lbl.setGeometry(QtCore.QRect(100, 310, 61, 20))
+        self.mrperp_lbl.setGeometry(QtCore.QRect(40, 310, 101, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -192,7 +189,7 @@ class Ui_MainWindow(object):
         self.risk_free_rate_txt.setValidator(self.onlyNumbers)        
         
         self.risk_free_rate_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.risk_free_rate_lbl.setGeometry(QtCore.QRect(80, 340, 81, 20))
+        self.risk_free_rate_lbl.setGeometry(QtCore.QRect(40, 340, 141, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -206,7 +203,7 @@ class Ui_MainWindow(object):
         self.terminal_txt.setValidator(self.onlyNumbers)         
         
         self.terminal_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.terminal_lbl.setGeometry(QtCore.QRect(35, 370, 150, 20))
+        self.terminal_lbl.setGeometry(QtCore.QRect(10, 370, 170, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -218,7 +215,7 @@ class Ui_MainWindow(object):
         self.year_growth_txt.setObjectName("risk_free_rate_txt")
         
         self.year_growth_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.year_growth_lbl.setGeometry(QtCore.QRect(40, 400, 150, 20))
+        self.year_growth_lbl.setGeometry(QtCore.QRect(10, 400, 170, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -228,7 +225,7 @@ class Ui_MainWindow(object):
         self.year_growth_txt.setMaximum(10)
         
         self.growth_rate_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.growth_rate_lbl.setGeometry(QtCore.QRect(30, 430, 81, 20))
+        self.growth_rate_lbl.setGeometry(QtCore.QRect(40, 430, 130, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -236,7 +233,7 @@ class Ui_MainWindow(object):
         self.growth_rate_lbl.setObjectName("growth_rate_lbl")
         
         self.smallest_of_etc_rd = QtWidgets.QRadioButton(self.centralwidget)
-        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 460, 231, 17))
+        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 460, 271, 17))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(11)
@@ -252,7 +249,7 @@ class Ui_MainWindow(object):
         self.custom_rd.setObjectName("custom_rd")
         
         self.custom_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.custom_txt.setGeometry(QtCore.QRect(140, 490, 51, 20))
+        self.custom_txt.setGeometry(QtCore.QRect(160, 490, 51, 20))
         self.custom_txt.setObjectName("custom_txt")
         
         self.run_btn = QtWidgets.QPushButton(self.centralwidget)
