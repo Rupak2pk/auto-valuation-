@@ -31,7 +31,10 @@ def write_to_target(target, directory, sheet_name):
             column_letter = get_column_letter((column_index + 1))
             s = cell
             try:
-                s=float(s)
+                try:
+                    s=float(s.replace(',', ''))
+                except:
+                    s=float(s)
             except ValueError:
                 pass
 
@@ -39,6 +42,21 @@ def write_to_target(target, directory, sheet_name):
     
     book.save(filename = target)
 
+def write_to_target_xlsx(target, directory, sheet_name):
+    wb1 = openpyxl.load_workbook(target)
+    ws1 = wb1.get_sheet_by_name(sheet_name)
+    
+    wb2 = openpyxl.load_workbook(directory)
+    ws2 = wb2.active
+    mr = ws2.max_row
+    mc = ws2.max_column
+    
+    for i in range(1, mr + 1):
+        for j in range(1, mc + 1):
+            c = ws2.cell(row = i, column = j)
+            ws1.cell(row = i, column = j).value = c.value 
+    wb1.save(filename = target)
+            
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -200,8 +218,7 @@ class Ui_MainWindow(object):
         self.terminal_txt.setGeometry(QtCore.QRect(180, 370, 61, 20))
         self.terminal_txt.setText("")
         self.terminal_txt.setObjectName("terminal_txt")
-        self.terminal_txt.setValidator(self.onlyNumbers)         
-        
+        self.terminal_txt.setValidator(self.onlyNumbers)
         self.terminal_lbl = QtWidgets.QLabel(self.centralwidget)
         self.terminal_lbl.setGeometry(QtCore.QRect(10, 370, 170, 20))
         font = QtGui.QFont()
@@ -326,7 +343,8 @@ class Ui_MainWindow(object):
             self.balance_sheet_txt.setText(os.path.realpath(ticker + "\\{} Balance Sheet.csv").format(ticker))           
             self.cash_flow_txt.setText(os.path.realpath(ticker + "\\{} Cash Flow.csv").format(ticker))            
             self.key_ratios_txt.setText(os.path.realpath(ticker + "\\{} Key Ratios.csv").format(ticker))     
-                
+             
+               
         except:
             try:
                 driver.quit()
@@ -361,7 +379,7 @@ class Ui_MainWindow(object):
         
     def get_xl_debt(self):
         global book_debt
-        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if debt_filename:
             self.debt_spreadsheet_txt.setText(debt_filename)             
@@ -391,26 +409,55 @@ class Ui_MainWindow(object):
             notice = msg.exec()            
 
         else:
-            ticker = self.company_ticker_txt.text()
-            original = 'Template.xlsx'
-            target = ticker + '_Valuation.xlsx'
-            shutil.copyfile(original, target)
-            
-            book = openpyxl.load_workbook(target)
-            sheet_name = 'Income Statement'
-            
-            write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
-            write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
-            write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
-            write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
-            
-            msg = QMessageBox()
-            msg.setWindowTitle("Notice")
-            msg.setIcon(QMessageBox.Information)
-            msg.setText("Workbook Created!")
-            notice = msg.exec()
-            os.system("start EXCEL.EXE " + target)
-            
+            try:
+                ticker = self.company_ticker_txt.text()
+                original = 'Template.xlsx'
+                target = ticker + '_Valuation.xlsx'
+                shutil.copyfile(original, target)
+                
+                book = openpyxl.load_workbook(target)
+                sheet_name = 'Income Statement'
+                
+                ws = book.get_sheet_by_name('DDM')
+                
+                terminal_decimal = float(self.terminal_txt.text()) / 100
+                ws['B7'].value = float(terminal_decimal)
+                ws['B7'].number_format = '0.00%'
+                
+                risk_free_decimal = float(self.risk_free_rate_txt.text()) / 100
+                ws['F4'].value = float(risk_free_decimal)
+                ws['F4'].number_format = '0.00%'                
+                
+                ws['B5'].value = int(self.year_growth_txt.value())
+                
+                ws = book.get_sheet_by_name('DCF')
+                
+                MRP_decimal = float(self.mrperp__txt.text()) / 100
+                ws['P9'].value = float(MRP_decimal)
+                ws['P9'].number_format = '0.00%'
+                
+                book.save(filename = target)
+                
+                write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
+                write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
+                write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
+                write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
+                write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')           
+                
+                msg = QMessageBox()
+                msg.setWindowTitle("Notice")
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Workbook Created!")
+                notice = msg.exec()
+                os.system("start EXCEL.EXE " + target)
+                
+            except:
+                msg = QMessageBox()
+                msg.setWindowTitle("Notice")
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Something went wrong. Try redownloading the sheets form MorningStar or check the values that have been entered or check if an valuation excel is currently open and close it.")
+                notice = msg.exec()           
+                return error
             
     def reset(self):
         self.Income_statement_txt.setText("")
@@ -462,5 +509,10 @@ if __name__ == "__main__":
     Gui = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setup_Ui(Gui)
-    Gui.show()  
+    Gui.show()
+    msg = QMessageBox()
+    msg.setWindowTitle("Disclaimer")
+    msg.setIcon(QMessageBox.Information)
+    msg.setText("The morningstar website may or may not be unstabled. There have been reports of JP Morgan (JPM) excel sheets being installed at random. Proceed with caution.")
+    notice = msg.exec()    
     sys.exit(app.exec_())
