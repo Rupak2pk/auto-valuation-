@@ -7,7 +7,9 @@ import sys
 import openpyxl
 import csv
 import glob
-from xlsxwriter.workbook import Workbook
+#Just a forewarning this module requires requests html
+from yahoo_fin import stock_info
+#from xlsxwriter.workbook import Workbook
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -15,7 +17,6 @@ from selenium.webdriver.chrome.options import Options
 import shutil
 import os
 import os.path
-import win32com.client
 from openpyxl.utils import get_column_letter
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
@@ -56,7 +57,7 @@ def write_to_target_xlsx(target, directory, sheet_name):
             c = ws2.cell(row = i, column = j)
             ws1.cell(row = i, column = j).value = c.value 
     wb1.save(filename = target)
-            
+    
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -255,7 +256,7 @@ class Ui_MainWindow(object):
         font.setFamily("Cambria")
         font.setPointSize(11)
         self.smallest_of_etc_rd.setFont(font)
-        self.smallest_of_etc_rd.setObjectName("smallest_of_etc_rd")
+        self.smallest_of_etc_rd.setChecked(True)
         
         self.custom_rd = QtWidgets.QRadioButton(self.centralwidget)
         self.custom_rd.setGeometry(QtCore.QRect(60, 490, 231, 17))
@@ -268,6 +269,8 @@ class Ui_MainWindow(object):
         self.custom_txt = QtWidgets.QLineEdit(self.centralwidget)
         self.custom_txt.setGeometry(QtCore.QRect(160, 490, 51, 20))
         self.custom_txt.setObjectName("custom_txt")
+        self.onlyNumbers = QtGui.QDoubleValidator()
+        self.custom_txt.setValidator(self.onlyNumbers)         
         
         self.run_btn = QtWidgets.QPushButton(self.centralwidget)
         self.run_btn.setGeometry(QtCore.QRect(50, 520, 75, 23))
@@ -379,7 +382,7 @@ class Ui_MainWindow(object):
         
     def get_xl_debt(self):
         global book_debt
-        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if debt_filename:
             self.debt_spreadsheet_txt.setText(debt_filename)             
@@ -393,8 +396,7 @@ class Ui_MainWindow(object):
             self.key_ratios_txt.setText(ratios_filename)  
            
     def run(self):
-        '''if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":'''
-        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "":
+        if self.Income_statement_txt.text() == "" or  self.balance_sheet_txt.text() == "" or self.cash_flow_txt.text() == "" or self.debt_spreadsheet_txt.text() == "" or self.key_ratios_txt.text() == "" or self.company_ticker_txt.text() == "" or self.mrperp__txt.text() == "" or self.risk_free_rate_txt.text() == "":
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
@@ -418,23 +420,34 @@ class Ui_MainWindow(object):
                 book = openpyxl.load_workbook(target)
                 sheet_name = 'Income Statement'
                 
-                ws = book.get_sheet_by_name('DDM')
-                
-                terminal_decimal = float(self.terminal_txt.text()) / 100
-                ws['B7'].value = float(terminal_decimal)
-                ws['B7'].number_format = '0.00%'
-                
-                risk_free_decimal = float(self.risk_free_rate_txt.text()) / 100
-                ws['F4'].value = float(risk_free_decimal)
-                ws['F4'].number_format = '0.00%'                
-                
-                ws['B5'].value = int(self.year_growth_txt.value())
+                #ws = book.get_sheet_by_name('DDM')
                 
                 ws = book.get_sheet_by_name('DCF')
                 
+                ws['B7'].value = int(self.year_growth_txt.value())
+                
+                terminal_decimal = float(self.terminal_txt.text()) / 100
+                ws['B9'].value = float(terminal_decimal)
+                ws['B9'].number_format = '0.00%'
+                                
+                risk_free_decimal = float(self.risk_free_rate_txt.text()) / 100
+                ws['P17'].value = float(risk_free_decimal)
+                ws['P17'].number_format = '0.00%'  
+                                
                 MRP_decimal = float(self.mrperp__txt.text()) / 100
                 ws['P9'].value = float(MRP_decimal)
                 ws['P9'].number_format = '0.00%'
+                
+                ws['P12'].value = stock_info.get_live_price(ticker)
+                
+                beta = stock_info.get_quote_table(ticker, dict_result=True)
+                ws['P2'].value = beta['Beta (5Y Monthly)']
+                
+                ws = book.get_sheet_by_name('Growth Rates')
+                
+                if self.custom_rd.isChecked():
+                    custom_decimal = float(self.custom_txt.text()) / 100
+                    ws['B18'].value = float(custom_decimal)
                 
                 book.save(filename = target)
                 
@@ -442,34 +455,9 @@ class Ui_MainWindow(object):
                 write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
                 write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
                 write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
-                write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')
+                write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')           
                 
-                #This allows for seamless transition of VBA code to Python
-                xlApp = Dispatch("Excel.Application")
-                xlApp.Visible=0
-                xlApp.Workbooks.Add()
-                xlToLeft = 1
-                xlToRight = 2
-                xlUp = 3
-                xlDown = 4
-                xlThick = 4
-                xlThin = 2
-                xlEdgeBottom=9
-            
-                xlApp.Workbooks.Open(Filename = target, ReadOnly=0)
-                xlApp.Sheets("Debt Template").Select
-                xlApp.Range("A3").Select
-                xlApp.Range(Selection, Selection.End(xlToRight)).Select
-                xlApp.Range(Selection, Selection.End(xlDown)).Select
-                xlApp.Selection.Copy
-                xlApp.Sheets("DCF").Select
-                xlApp.ActiveWindow.ScrollColumn = 2
-                xlApp.Range("S5").Select
-                xlApp.Range("S5").Insert(Shift=xlDown)
-                xlApp.Range("T5").Select
-                xlApp.Application.Quit()
-                del xlApp
-                
+                                
                 msg = QMessageBox()
                 msg.setWindowTitle("Notice")
                 msg.setIcon(QMessageBox.Information)
@@ -483,7 +471,6 @@ class Ui_MainWindow(object):
                 msg.setIcon(QMessageBox.Information)
                 msg.setText("Something went wrong. Try redownloading the sheets form MorningStar or check the values that have been entered or check if an valuation excel is currently open and close it.")
                 notice = msg.exec()           
-                return error
             
     def reset(self):
         self.Income_statement_txt.setText("")
