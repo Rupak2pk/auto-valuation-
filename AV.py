@@ -379,7 +379,7 @@ class Ui_MainWindow(object):
         
     def get_xl_debt(self):
         global book_debt
-        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx)')
 
         if debt_filename:
             self.debt_spreadsheet_txt.setText(debt_filename)             
@@ -442,7 +442,33 @@ class Ui_MainWindow(object):
                 write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
                 write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
                 write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
-                write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')           
+                write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')
+                
+                #This allows for seamless transition of VBA code to Python
+                xlApp = Dispatch("Excel.Application")
+                xlApp.Visible=0
+                xlApp.Workbooks.Add()
+                xlToLeft = 1
+                xlToRight = 2
+                xlUp = 3
+                xlDown = 4
+                xlThick = 4
+                xlThin = 2
+                xlEdgeBottom=9
+            
+                xlApp.Workbooks.Open(Filename = target, ReadOnly=0)
+                xlApp.Sheets("Debt Template").Select
+                xlApp.Range("A3").Select
+                xlApp.Range(Selection, Selection.End(xlToRight)).Select
+                xlApp.Range(Selection, Selection.End(xlDown)).Select
+                xlApp.Selection.Copy
+                xlApp.Sheets("DCF").Select
+                xlApp.ActiveWindow.ScrollColumn = 2
+                xlApp.Range("S5").Select
+                xlApp.Range("S5").Insert(Shift=xlDown)
+                xlApp.Range("T5").Select
+                xlApp.Application.Quit()
+                del xlApp
                 
                 msg = QMessageBox()
                 msg.setWindowTitle("Notice")
