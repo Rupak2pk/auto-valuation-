@@ -15,6 +15,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from openpyxl.worksheet.datavalidation import DataValidation
 import shutil
 import os
 import os.path
@@ -455,7 +456,7 @@ class Ui_MainWindow(object):
                 target = ticker + '_Valuation.xlsx'
                 shutil.copyfile(original, target)
                 
-                book = openpyxl.load_workbook(target, data_only=True)
+                book = openpyxl.load_workbook(target, data_only=False)
                 
                 ws = book.get_sheet_by_name('DCF')
                 
@@ -486,9 +487,10 @@ class Ui_MainWindow(object):
                 
         
                 if self.Financial_statement_rd.isChecked():
-                    print("Openpyxl is fucking gay")
-                    
-
+                    ws = book.get_sheet_by_name('DCF')
+                    ws['Y1'].value = 'Financial Statements'
+            
+                
                 book.save(filename = target)
                 
                 write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
@@ -498,6 +500,8 @@ class Ui_MainWindow(object):
                 
                 if self.spreadsheet_rd.isChecked():
                     write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')           
+                
+                
                 
                                 
                 msg = QMessageBox()
@@ -571,6 +575,6 @@ if __name__ == "__main__":
     msg = QMessageBox()
     msg.setWindowTitle("Disclaimer")
     msg.setIcon(QMessageBox.Information)
-    msg.setText("The morningstar website may or may not be unstabled. There have been reports of JP Morgan (JPM) excel sheets being installed at random. Proceed with caution.")
+    msg.setText("The morningstar website is a little unstable. Downloads may not work sometimes. Retry the download if you get an Error.")
     notice = msg.exec()    
     sys.exit(app.exec_())
