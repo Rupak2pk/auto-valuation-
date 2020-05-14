@@ -558,7 +558,7 @@ class Ui_MainWindow(object):
         self.terminal_lbl.setText(_translate("MainWindow", "Terminal Growth Rate"))
         self.year_growth_lbl.setText(_translate("MainWindow", "Years of High Growth"))
         self.growth_rate_lbl.setText(_translate("MainWindow", "Growth Rate:"))
-        self.smallest_of_etc_rd.setText(_translate("MainWindow", "Use smallest of IAR, SAR, or ROLC"))
+        self.smallest_of_etc_rd.setText(_translate("MainWindow", "Use smallest of IGR, SGR, or ROI"))
         self.custom_rd.setText(_translate("MainWindow", "Custom"))
         self.run_btn.setText(_translate("MainWindow", "Run"))
         self.reset_btn.setText(_translate("MainWindow", "Reset"))
