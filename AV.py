@@ -63,7 +63,7 @@ def write_to_target_xlsx(target, directory, sheet_name):
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(485, 640)
+        MainWindow.resize(485, 660)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         
@@ -271,8 +271,22 @@ class Ui_MainWindow(object):
         self.year_growth_txt.setMinimum(0)
         self.year_growth_txt.setMaximum(10)
         
+        self.year_growth_txt_ddm = QtWidgets.QSpinBox(self.centralwidget)
+        self.year_growth_txt_ddm.setGeometry(QtCore.QRect(180, 490, 61, 20))
+        self.year_growth_txt_ddm.setObjectName("risk_free_rate_txt")        
+        
+        self.year_growth_lbl_ddm = QtWidgets.QLabel(self.centralwidget)
+        self.year_growth_lbl_ddm.setGeometry(QtCore.QRect(10, 490, 170, 20))
+        font = QtGui.QFont()
+        font.setFamily("Cambria")
+        font.setPointSize(8)
+        self.year_growth_lbl_ddm.setFont(font)
+        self.year_growth_lbl_ddm.setObjectName("risk_free_rate_lbl")
+        self.year_growth_txt_ddm.setMinimum(0)
+        self.year_growth_txt_ddm.setMaximum(10)        
+        
         self.growth_rate_lbl = QtWidgets.QLabel(self.centralwidget)
-        self.growth_rate_lbl.setGeometry(QtCore.QRect(40, 490, 130, 20))
+        self.growth_rate_lbl.setGeometry(QtCore.QRect(40, 520, 130, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(10)
@@ -280,7 +294,7 @@ class Ui_MainWindow(object):
         self.growth_rate_lbl.setObjectName("growth_rate_lbl")
         
         self.smallest_of_etc_rd = QtWidgets.QRadioButton(self.centralwidget)
-        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 520, 271, 17))
+        self.smallest_of_etc_rd.setGeometry(QtCore.QRect(60, 550, 271, 17))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(11)
@@ -289,7 +303,7 @@ class Ui_MainWindow(object):
         self.smallest_of_etc_rd.setChecked(True)
         
         self.custom_rd = QtWidgets.QRadioButton(self.centralwidget)
-        self.custom_rd.setGeometry(QtCore.QRect(60, 550, 231, 17))
+        self.custom_rd.setGeometry(QtCore.QRect(60, 580, 231, 17))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(11)
@@ -298,23 +312,23 @@ class Ui_MainWindow(object):
         self.custom_rd.setObjectName("custom_rd")
         
         self.custom_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.custom_txt.setGeometry(QtCore.QRect(160, 550, 51, 20))
+        self.custom_txt.setGeometry(QtCore.QRect(160, 580, 51, 20))
         self.custom_txt.setObjectName("custom_txt")
         self.onlyNumbers = QtGui.QDoubleValidator()
         self.custom_txt.setValidator(self.onlyNumbers)         
         
         self.run_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.run_btn.setGeometry(QtCore.QRect(50, 580, 75, 23))
+        self.run_btn.setGeometry(QtCore.QRect(50, 610, 75, 23))
         self.run_btn.setObjectName("run_btn")
         self.run_btn.clicked.connect(self.run)
         
         self.reset_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.reset_btn.setGeometry(QtCore.QRect(140, 580, 75, 23))
+        self.reset_btn.setGeometry(QtCore.QRect(140, 610, 75, 23))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset)
         
         self.close_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.close_btn.setGeometry(QtCore.QRect(230, 580, 75, 23))
+        self.close_btn.setGeometry(QtCore.QRect(230, 610, 75, 23))
         self.close_btn.setObjectName("close_btn")
         self.close_btn.clicked.connect(self.close)
         
@@ -490,7 +504,10 @@ class Ui_MainWindow(object):
                     ws = book.get_sheet_by_name('DCF')
                     ws['Y1'].value = 'Financial Statements'
             
-                
+                ws = book.get_sheet_by_name('DDM')
+                    
+                ws['B5'].value = int(self.year_growth_txt_ddm.value())
+                    
                 book.save(filename = target)
                 
                 write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
@@ -557,6 +574,7 @@ class Ui_MainWindow(object):
         self.risk_free_rate_lbl.setText(_translate("MainWindow", "Risk Free Rate"))
         self.terminal_lbl.setText(_translate("MainWindow", "Terminal Growth Rate"))
         self.year_growth_lbl.setText(_translate("MainWindow", "Years of High Growth"))
+        self.year_growth_lbl_ddm.setText(_translate("MainWindow", "Years of High Growth (DDL)"))
         self.growth_rate_lbl.setText(_translate("MainWindow", "Growth Rate:"))
         self.smallest_of_etc_rd.setText(_translate("MainWindow", "Use smallest of IGR, SGR, or ROI"))
         self.custom_rd.setText(_translate("MainWindow", "Custom"))
