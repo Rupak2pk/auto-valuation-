@@ -1,3 +1,19 @@
-- Fix "Use Smallest of ROL" to "ROI"
-- Add DDM
-- Add Multiples
+DDM is complete; But the GUI needs an additional input for years of high growth specifically for 
+DDM.
+
+Multiples isn't even close to being done. But we may have come close.
+
+If we can webscrape the morningstar website to grab valuation ratios, we could possibly do a multiples
+valuation. But this will be difficult.
+
+We need to pull:
+Forward P/E
+P/B
+P/S
+P/CF
+
+Enterprise Value can either be calculated or pulled, if yfinance allows for it, we can pull it from there.
+EBITDA is found on income statement, so we are fine.
+
+Most likely once Rupak fixes DDM we will move to testing phase and worry about multiples later.
+Multiples is far less time consuming than DCF. 

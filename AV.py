@@ -332,9 +332,9 @@ class Ui_MainWindow(object):
         self.close_btn.setObjectName("close_btn")
         self.close_btn.clicked.connect(self.close)
         
-        #self.get_bond_data = QtWidgets.QPushButton(self.centralwidget)
-        #self.get_bond_data.setGeometry(QtCore.QRect(230, 620, 75, 23))
-        #self.get_bond_data.clicked.connect(self.close)
+        self.get_bond_data = QtWidgets.QPushButton(self.centralwidget)
+        self.get_bond_data.setGeometry(QtCore.QRect(320, 610, 135, 23))
+        self.get_bond_data.clicked.connect(self.open_bond)
 
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -551,6 +551,13 @@ class Ui_MainWindow(object):
         
     def close(self):
         app.quit()
+    
+    def open_bond(self):
+        ticker = self.company_ticker_txt.text()
+        original = 'Debt_Template.xlsx'
+        target = ticker + '_Debt_Template.xlsx'
+        shutil.copyfile(original, target)
+        os.system("start EXCEL.EXE " + target)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -574,14 +581,14 @@ class Ui_MainWindow(object):
         self.risk_free_rate_lbl.setText(_translate("MainWindow", "Risk Free Rate"))
         self.terminal_lbl.setText(_translate("MainWindow", "Terminal Growth Rate"))
         self.year_growth_lbl.setText(_translate("MainWindow", "Years of High Growth"))
-        self.year_growth_lbl_ddm.setText(_translate("MainWindow", "Years of High Growth (DDL)"))
+        self.year_growth_lbl_ddm.setText(_translate("MainWindow", "Years of High Growth (DDM)"))
         self.growth_rate_lbl.setText(_translate("MainWindow", "Growth Rate:"))
         self.smallest_of_etc_rd.setText(_translate("MainWindow", "Use smallest of IGR, SGR, or ROI"))
         self.custom_rd.setText(_translate("MainWindow", "Custom"))
         self.run_btn.setText(_translate("MainWindow", "Run"))
         self.reset_btn.setText(_translate("MainWindow", "Reset"))
         self.close_btn.setText(_translate("MainWindow", "Close"))
-        #self.get_bond_data.setText(_translate("MainWindow", "Get Bond Data"))
+        self.get_bond_data.setText(_translate("MainWindow", "Create Bond Template"))
         
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
