@@ -5,7 +5,6 @@
 
 import sys
 import openpyxl
-import win32com.client as win32
 import csv
 import glob
 #Just a forewarning this module requires requests html
@@ -24,19 +23,23 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
 
   
-def write_to_target(target, directory, sheet_name):
+def write_to_target_page(target, directory, sheet_name):
+    #writes to the target sheet page
     book = openpyxl.load_workbook(target)
     ws = book.get_sheet_by_name(sheet_name)
     f = open(directory)
     reader = csv.reader(f)
+    #writes the values cell by cell to the selected page
     for row_index, row in enumerate(reader):
         for column_index, cell in enumerate(row):
             column_letter = get_column_letter((column_index + 1))
             s = cell
             try:
                 try:
+                    #remove the ',' in numbers
                     s=float(s.replace(',', ''))
                 except:
+                    #if number doesn't exist
                     s=float(s)
             except ValueError:
                 pass
@@ -45,7 +48,8 @@ def write_to_target(target, directory, sheet_name):
     
     book.save(filename = target)
 
-def write_to_target_xlsx(target, directory, sheet_name):
+def write_to_target_debt(target, directory, sheet_name):
+    #writes the debt template to the debt temptlate sheet (duh) if given
     wb1 = openpyxl.load_workbook(target)
     ws1 = wb1.get_sheet_by_name(sheet_name)
     
@@ -75,14 +79,9 @@ class Ui_MainWindow(object):
         self.title.setFont(font)
         self.title.setObjectName("title")
         
-
         self.debt_group = QtWidgets.QButtonGroup()
-        #debt_group.addButton(self.Financial_statement_rd, 1)
-        #debt_group.addButton(self.spreadsheet_rd, 2)
         
         self.growth_rate = QtWidgets.QButtonGroup()
-        #growth_rate.addButton(self.custom_rd, 1)
-        #growth_rate.addButton(self.smallest_of_etc_rd, 2)
         
         self.logo = QtWidgets.QLabel(self.centralwidget)
         self.logo.setGeometry(QtCore.QRect(40, 10, 161, 111))
@@ -90,8 +89,10 @@ class Ui_MainWindow(object):
         self.logo.setPixmap(QtGui.QPixmap("Capture.PNG"))
         self.logo.setObjectName("logo")
         
+        #Main company info
+        
         self.company_ticker_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.company_ticker_txt.setGeometry(QtCore.QRect(180, 130, 61, 20))
+        self.company_ticker_txt.setGeometry(QtCore.QRect(190, 130, 61, 20))
         self.company_ticker_txt.setObjectName("company_ticker_txt")
         
         self.company_ticker_lbl = QtWidgets.QLabel(self.centralwidget)
@@ -103,12 +104,12 @@ class Ui_MainWindow(object):
         self.company_ticker_lbl.setObjectName("company_ticket_lbl")
         
         self.company_ticker_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.company_ticker_btn.setGeometry(QtCore.QRect(235, 130, 125, 23))
+        self.company_ticker_btn.setGeometry(QtCore.QRect(245, 130, 125, 23))
         self.company_ticker_btn.setObjectName("company_ticker_btn")
         self.company_ticker_btn.clicked.connect(self.morningstar_download)
         
         self.balance_sheet_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.balance_sheet_btn.setGeometry(QtCore.QRect(380, 160, 75, 23))
+        self.balance_sheet_btn.setGeometry(QtCore.QRect(390, 160, 75, 23))
         self.balance_sheet_btn.setObjectName("balance_sheet_btn")
         self.balance_sheet_btn.clicked.connect(self.get_xl_balance)
         
@@ -121,14 +122,15 @@ class Ui_MainWindow(object):
         self.balance_sheet_lbl.setObjectName("balance_sheet_lbl")
         
         self.balance_sheet_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.balance_sheet_txt.setGeometry(QtCore.QRect(180, 160, 201, 21))
+        self.balance_sheet_txt.setGeometry(QtCore.QRect(190, 160, 201, 21))
         self.balance_sheet_txt.setObjectName("balance_sheet_txt")
         self.balance_sheet_txt.setReadOnly(True)      
         
-        self.cash_flow_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.cash_flow_btn.setGeometry(QtCore.QRect(380, 190, 75, 23))
-        self.cash_flow_btn.setObjectName("cash_flow_btn")
-        self.cash_flow_btn.clicked.connect(self.get_xl_cash)
+
+        self.cash_flow_txt = QtWidgets.QLineEdit(self.centralwidget)
+        self.cash_flow_txt.setGeometry(QtCore.QRect(190, 190, 201, 21))
+        self.cash_flow_txt.setObjectName("cash_flow_txt")
+        self.cash_flow_txt.setReadOnly(True)        
         
         self.cash_flow_lbl = QtWidgets.QLabel(self.centralwidget)
         self.cash_flow_lbl.setGeometry(QtCore.QRect(40, 190, 101, 20))
@@ -138,18 +140,18 @@ class Ui_MainWindow(object):
         self.cash_flow_lbl.setFont(font)
         self.cash_flow_lbl.setObjectName("cash_flow_lbl")
         
-        self.cash_flow_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.cash_flow_txt.setGeometry(QtCore.QRect(180, 190, 201, 21))
-        self.cash_flow_txt.setObjectName("cash_flow_txt")
-        self.cash_flow_txt.setReadOnly(True)
+        self.cash_flow_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.cash_flow_btn.setGeometry(QtCore.QRect(390, 190, 75, 23))
+        self.cash_flow_btn.setObjectName("cash_flow_btn")
+        self.cash_flow_btn.clicked.connect(self.get_xl_cash)
         
         self.Income_statement_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.Income_statement_txt.setGeometry(QtCore.QRect(180, 220, 201, 21))
+        self.Income_statement_txt.setGeometry(QtCore.QRect(190, 220, 201, 21))
         self.Income_statement_txt.setObjectName("Income_statement_txt")
         self.Income_statement_txt.setReadOnly(True)
         
         self.income_statement_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.income_statement_btn.setGeometry(QtCore.QRect(380, 220, 75, 23))
+        self.income_statement_btn.setGeometry(QtCore.QRect(390, 220, 75, 23))
         self.income_statement_btn.setObjectName("income_statement_btn")
         self.income_statement_btn.clicked.connect(self.get_xl_income)
         
@@ -206,16 +208,17 @@ class Ui_MainWindow(object):
         self.key_ratios_lbl.setObjectName("key_ratios_lbl")
         
         self.key_ratios_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.key_ratios_btn.setGeometry(QtCore.QRect(380, 250, 75, 23)) 
+        self.key_ratios_btn.setGeometry(QtCore.QRect(390, 250, 75, 23)) 
         self.key_ratios_btn.clicked.connect(self.get_xl_ratios)
         
         self.key_ratios_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.key_ratios_txt.setGeometry(QtCore.QRect(180, 250, 201, 21))
+        self.key_ratios_txt.setGeometry(QtCore.QRect(190, 250, 201, 21))
         self.key_ratios_txt.setReadOnly(True)  
         
+        #Additional financial info
         
         self.mrperp__txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.mrperp__txt.setGeometry(QtCore.QRect(180, 370, 61, 20))
+        self.mrperp__txt.setGeometry(QtCore.QRect(190, 370, 61, 20))
         self.mrperp__txt.setText("")
         self.mrperp__txt.setObjectName("mrperp__txt")
         self.onlyNumbers = QtGui.QDoubleValidator()
@@ -230,7 +233,7 @@ class Ui_MainWindow(object):
         self.mrperp_lbl.setObjectName("mrperp_lbl")
         
         self.risk_free_rate_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.risk_free_rate_txt.setGeometry(QtCore.QRect(180, 400, 61, 20))
+        self.risk_free_rate_txt.setGeometry(QtCore.QRect(190, 400, 61, 20))
         self.risk_free_rate_txt.setText("")
         self.risk_free_rate_txt.setObjectName("risk_free_rate_txt")
         self.onlyNumbers = QtGui.QDoubleValidator()
@@ -245,7 +248,7 @@ class Ui_MainWindow(object):
         self.risk_free_rate_lbl.setObjectName("risk_free_rate_lbl")
         
         self.terminal_txt = QtWidgets.QLineEdit(self.centralwidget)
-        self.terminal_txt.setGeometry(QtCore.QRect(180, 430, 61, 20))
+        self.terminal_txt.setGeometry(QtCore.QRect(190, 430, 61, 20))
         self.terminal_txt.setText("")
         self.terminal_txt.setObjectName("terminal_txt")
         self.terminal_txt.setValidator(self.onlyNumbers)
@@ -258,7 +261,7 @@ class Ui_MainWindow(object):
         self.terminal_lbl.setObjectName("terminal_lbl")
         
         self.year_growth_txt = QtWidgets.QSpinBox(self.centralwidget)
-        self.year_growth_txt.setGeometry(QtCore.QRect(180, 460, 61, 20))
+        self.year_growth_txt.setGeometry(QtCore.QRect(190, 460, 61, 20))
         self.year_growth_txt.setObjectName("risk_free_rate_txt")
         
         self.year_growth_lbl = QtWidgets.QLabel(self.centralwidget)
@@ -271,19 +274,19 @@ class Ui_MainWindow(object):
         self.year_growth_txt.setMinimum(0)
         self.year_growth_txt.setMaximum(10)
         
-        self.year_growth_txt_ddm = QtWidgets.QSpinBox(self.centralwidget)
-        self.year_growth_txt_ddm.setGeometry(QtCore.QRect(180, 490, 61, 20))
-        self.year_growth_txt_ddm.setObjectName("risk_free_rate_txt")        
+        self.year_growth_ddm_txt = QtWidgets.QSpinBox(self.centralwidget)
+        self.year_growth_ddm_txt.setGeometry(QtCore.QRect(190, 490, 61, 20))
+        self.year_growth_ddm_txt.setObjectName("risk_free_rate_txt")        
         
-        self.year_growth_lbl_ddm = QtWidgets.QLabel(self.centralwidget)
-        self.year_growth_lbl_ddm.setGeometry(QtCore.QRect(10, 490, 170, 20))
+        self.year_growth_ddm_lbl = QtWidgets.QLabel(self.centralwidget)
+        self.year_growth_ddm_lbl.setGeometry(QtCore.QRect(10, 490, 170, 20))
         font = QtGui.QFont()
         font.setFamily("Cambria")
         font.setPointSize(8)
-        self.year_growth_lbl_ddm.setFont(font)
-        self.year_growth_lbl_ddm.setObjectName("risk_free_rate_lbl")
-        self.year_growth_txt_ddm.setMinimum(0)
-        self.year_growth_txt_ddm.setMaximum(10)        
+        self.year_growth_ddm_lbl.setFont(font)
+        self.year_growth_ddm_lbl.setObjectName("risk_free_rate_lbl")
+        self.year_growth_ddm_txt.setMinimum(0)
+        self.year_growth_ddm_txt.setMaximum(10)        
         
         self.growth_rate_lbl = QtWidgets.QLabel(self.centralwidget)
         self.growth_rate_lbl.setGeometry(QtCore.QRect(40, 520, 130, 20))
@@ -351,9 +354,11 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
     def morningstar_download(self):
+        
         ticker = self.company_ticker_txt.text()
         location = os.getcwd()
         path = os.path.join(location, ticker)
+        
         try:
             shutil.rmtree(path)
         except:
@@ -399,6 +404,7 @@ class Ui_MainWindow(object):
                 driver.quit()
             except:
                 pass
+            
             msg = QMessageBox()
             msg.setWindowTitle("Notice")
             msg.setIcon(QMessageBox.Information)
@@ -406,28 +412,24 @@ class Ui_MainWindow(object):
             notice = msg.exec()
     
     def get_xl_income(self):
-        global book_income
         income_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if income_filename:
             self.Income_statement_txt.setText(income_filename)
         
     def get_xl_balance(self):
-        global book_balance
         balance_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if balance_filename:
             self.balance_sheet_txt.setText(balance_filename)         
         
     def get_xl_cash(self):
-        global book_cash
         cash_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if cash_filename:
             self.cash_flow_txt.setText(cash_filename)
         
     def get_xl_debt(self):
-        global book_debt
         debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
 
         if debt_filename:
@@ -435,7 +437,6 @@ class Ui_MainWindow(object):
             
     
     def get_xl_ratios(self):
-        global book_ratios
         ratios_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV)')
 
         if ratios_filename:
@@ -506,20 +507,17 @@ class Ui_MainWindow(object):
             
                 ws = book.get_sheet_by_name('DDM')
                     
-                ws['B5'].value = int(self.year_growth_txt_ddm.value())
+                ws['B5'].value = int(self.year_growth_ddm_txt.value())
                     
                 book.save(filename = target)
                 
-                write_to_target(target, self.Income_statement_txt.text(), 'Income Statement')
-                write_to_target(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
-                write_to_target(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
-                write_to_target(target, self.key_ratios_txt.text(), 'Key Ratios')
+                write_to_target_page(target, self.Income_statement_txt.text(), 'Income Statement')
+                write_to_target_page(target, self.balance_sheet_txt.text(), 'Balance Sheet (Annual)')
+                write_to_target_page(target, self.cash_flow_txt.text(), 'Cash Flow Statement')
+                write_to_target_page(target, self.key_ratios_txt.text(), 'Key Ratios')
                 
                 if self.spreadsheet_rd.isChecked():
-                    write_to_target_xlsx(target, self.debt_spreadsheet_txt.text(), 'Debt Template')           
-                
-                
-                
+                    write_to_target_debt(target, self.debt_spreadsheet_txt.text(), 'Debt Template')                        
                                 
                 msg = QMessageBox()
                 msg.setWindowTitle("Notice")
@@ -533,8 +531,7 @@ class Ui_MainWindow(object):
                 msg.setWindowTitle("Notice")
                 msg.setIcon(QMessageBox.Information)
                 msg.setText("Something went wrong. Try redownloading the sheets form MorningStar or check the values that have been entered or check if an valuation excel is currently open and close it.")
-                notice = msg.exec()  
-                return error
+                notice = msg.exec()
             
     def reset(self):
         self.Income_statement_txt.setText("")
