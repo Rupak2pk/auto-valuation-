@@ -6,6 +6,7 @@
 import sys
 import openpyxl
 import csv
+import pandas as pd
 #Just a forewarning this module requires requests html
 from yahoo_fin import stock_info
 #from xlsxwriter.workbook import Workbook
@@ -20,6 +21,7 @@ import os.path
 from openpyxl.utils import get_column_letter
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QFileDialog
+
 
 
 def write_to_target_page(target, directory, sheet_name):
@@ -508,6 +510,16 @@ class Ui_MainWindow(object):
                 ws = book.get_sheet_by_name('DDM')
 
                 ws['B5'].value = int(self.year_growth_ddm_txt.value())
+                
+                ws = book.get_sheet_by_name('Multiples')
+                valuation_ratios = stock_info.get_stats_valuation(ticker)
+                valuation_ratios.to_dict()
+                ws['H12'].value = valuation_ratios.at[3,"As of Date: 8/9/2020Current"]
+                ws['H13'].value = valuation_ratios.at[6,"As of Date: 8/9/2020Current"]
+                ws['H14'].value = valuation_ratios.at[5,"As of Date: 8/9/2020Current"]
+                ws['H15'].value = valuation_ratios.at[8,"As of Date: 8/9/2020Current"]
+                
+                ws = book.get_sheet_by_name('DCF')
 
                 book.save(filename = target)
 
@@ -532,6 +544,7 @@ class Ui_MainWindow(object):
                 msg.setIcon(QMessageBox.Information)
                 msg.setText("Something went wrong. Try redownloading the sheets form MorningStar or check the values that have been entered or check if an valuation excel is currently open and close it.")
                 notice = msg.exec()
+                return error
 
     def reset(self):
         self.Income_statement_txt.setText("")
