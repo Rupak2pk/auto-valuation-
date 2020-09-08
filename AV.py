@@ -432,7 +432,7 @@ class Ui_MainWindow(object):
             self.cash_flow_txt.setText(cash_filename)
 
     def get_xl_debt(self):
-        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='CSV (*.CSV);;xlsx (*.xlsx)')
+        debt_filename, filter = QtWidgets.QFileDialog.getOpenFileName(caption='Open file',  filter='xlsx (*.xlsx)')
 
         if debt_filename:
             self.debt_spreadsheet_txt.setText(debt_filename)             
@@ -514,10 +514,10 @@ class Ui_MainWindow(object):
                 ws = book.get_sheet_by_name('Multiples')
                 valuation_ratios = stock_info.get_stats_valuation(ticker)
                 valuation_ratios.to_dict()
-                ws['H12'].value = valuation_ratios.at[3,"As of Date: 8/9/2020Current"]
-                ws['H13'].value = valuation_ratios.at[6,"As of Date: 8/9/2020Current"]
-                ws['H14'].value = valuation_ratios.at[5,"As of Date: 8/9/2020Current"]
-                ws['H15'].value = valuation_ratios.at[8,"As of Date: 8/9/2020Current"]
+                ws['H12'].value = valuation_ratios.iat[3,1]
+                ws['H13'].value = valuation_ratios.iat[6,1]
+                ws['H14'].value = valuation_ratios.iat[5,1]
+                ws['H15'].value = valuation_ratios.iat[8,1]
                 
                 ws = book.get_sheet_by_name('DCF')
 
