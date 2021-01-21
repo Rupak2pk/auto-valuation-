@@ -9,6 +9,7 @@ import csv
 import pandas as pd
 #Just a forewarning this module requires requests html
 from yahoo_fin import stock_info
+import yfinance as yf
 #from xlsxwriter.workbook import Workbook
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -512,7 +513,8 @@ class Ui_MainWindow(object):
                 ws['B5'].value = int(self.year_growth_ddm_txt.value())
                 
                 ws = book.get_sheet_by_name('Multiples')
-                valuation_ratios = stock_info.get_stats_valuation(ticker)
+                #valuation_ratios = stock_info.get_stats_valuation(ticker)
+                valuation_ratios = yf.download(ticker)
                 valuation_ratios.to_dict()
                 ws['H12'].value = valuation_ratios.iat[3,1]
                 ws['H13'].value = valuation_ratios.iat[6,1]
@@ -538,13 +540,14 @@ class Ui_MainWindow(object):
                 notice = msg.exec()
                 os.system("start EXCEL.EXE " + target)
 
-            except:
+            except Exception as e:
                 msg = QMessageBox()
                 msg.setWindowTitle("Notice")
                 msg.setIcon(QMessageBox.Information)
                 msg.setText("Something went wrong. Try redownloading the sheets form MorningStar or check the values that have been entered or check if an valuation excel is currently open and close it.")
                 notice = msg.exec()
-                return error
+                print(e)
+                
 
     def reset(self):
         self.Income_statement_txt.setText("")
