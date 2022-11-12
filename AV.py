@@ -60,7 +60,7 @@ def write_to_target_debt(target, directory, sheet_name):
     ws2 = wb2.active
     mr = ws2.max_row
     mc = ws2.max_column
-
+    
     for i in range(1, mr + 1):
         for j in range(1, mc + 1):
             c = ws2.cell(row = i, column = j)
@@ -606,6 +606,8 @@ class Ui_MainWindow(object):
         self.close_btn.setText(_translate("MainWindow", "Close"))
         self.get_bond_data.setText(_translate("MainWindow", "Create Bond Template"))
 
+        
+# the main start function. Opens the program
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Windows')
