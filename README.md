@@ -16,6 +16,10 @@ yahoo-fin has been producing errors that causes the get_live_stock_info to crash
 
 
 #To Do
+Webdriver_manager fails when attempting to retrieve ticker. Will be fixed
 
-yahoo-fin is currently acting up and will be fixed soon.
+
+The program fails to write to cell due to a missing arguement. Will be fixed
+
+
 
