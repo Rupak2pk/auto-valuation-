@@ -8,6 +8,7 @@ import openpyxl
 import csv
 import pandas as pd
 #Just a forewarning this module requires requests html
+#yahoo_fin is currently broken for some unknown reason
 from yahoo_fin import stock_info
 import yfinance as yf
 #from xlsxwriter.workbook import Workbook
@@ -51,7 +52,7 @@ def write_to_target_page(target, directory, sheet_name):
     book.save(filename = target)
 
 def write_to_target_debt(target, directory, sheet_name):
-    #writes the debt template to the debt temptlate sheet (duh) if given
+    #writes the debt template to the debt template sheet (duh) if given
     wb1 = openpyxl.load_workbook(target)
     ws1 = wb1.get_sheet_by_name(sheet_name)
 
@@ -66,6 +67,7 @@ def write_to_target_debt(target, directory, sheet_name):
             ws1.cell(row = i, column = j).value = c.value 
     wb1.save(filename = target)
 
+#basic gui setup. Very messy but necessary for the gui to show up
 class Ui_MainWindow(object):
     def setup_Ui(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -469,6 +471,7 @@ class Ui_MainWindow(object):
 
         else:
             try:
+                #once the user confirms the info in the text is what he wants, start writing to excel (important)
                 ticker = self.company_ticker_txt.text()
                 original = 'Template.xlsx'
                 target = ticker + '_Valuation.xlsx'
