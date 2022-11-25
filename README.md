@@ -15,7 +15,7 @@ Its a python built program that writes date into excel sheets. It uses chromedri
 yahoo-fin has been producing errors that causes the get_live_stock_info to crash. Yahoo_fin has recently been updated to fix it.
 
 
-#To Do
+# To Do
 Webdriver_manager fails when attempting to retrieve ticker. Will be fixed
 
 
